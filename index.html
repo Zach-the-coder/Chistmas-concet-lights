@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale: 1.0">
+    <title>Church Light Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            position: relative;
+        }
+
+        #control-panel {
+            width: 60%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #control-panel h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .scene-button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 15px;
+            font-size: 18px;
+            color: #ffffff;
+            background-color: #333333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            outline: none;
+            box-shadow: none;
+            transition: background-color 0.3s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        .scene-button.red {
+            background-color: #D32F2F;
+        }
+
+        .scene-button.green {
+            background-color: #4CAF50;
+        }
+
+        .scene-button:hover {
+            background-color: #444444;
+        }
+
+        .scene-button.red:hover {
+            background-color: #D32F2F;
+        }
+
+        .scene-button.green:hover {
+            background-color: #4CAF50;
+        }
+
+        .delete-button {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            font-size: 20px;
+            color: red;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+
+        .scene-button.edit-mode .delete-button {
+            display: block;
+        }
+
+        /* Section for Buttons */
+        #buttons-section {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        #add-scene-button {
+            background-color: #6200EE;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: none; /* Initially hidden */
+        }
+
+        #edit-button {
+            background-color: #6200EE;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #add-scene-box {
+            position: fixed;
+            bottom: 30px;
+            right: 165px;
+            background-color: #333;
+            color: #fff;
+            padding: 27px;
+            border-radius: 5px;
+            display: none;
+            z-index: 10;
+        }
+
+        #add-scene-box input {
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #bbb;
+            background-color: #222;
+            color: white;
+        }
+
+        #add-scene-box button {
+            padding: 10px;
+            background-color: #6200EE;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Countdown Display */
+        .countdown-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .countdown {
+            font-size: 36px;
+            color: #BB86FC;
+        }
+    </style>
+</head>
+<body>
+    <div id="control-panel">
+        <h1>Scenes</h1>
+        <div id="scene-list">
+            <!-- Scenes will be loaded here dynamically -->
+        </div>
+    </div>
+
+    <div class="countdown-container">
+        <div class="countdown" id="countdown"></div>
+    </div>
+
+    <!-- Section for Add Scene and Edit Mode Buttons -->
+    <div id="buttons-section">
+        <button id="edit-button" onclick="toggleEditMode()">Edit</button>
+        <button id="add-scene-button" onclick="showAddSceneBox()">Add Scene</button>
+    </div>
+
+    <div id="add-scene-box">
+        <input type="text" id="new-scene-name" placeholder="Enter Scene Name">
+        <button onclick="addNewScene()">Add</button>
+    </div>
+
+    <script>
+        let isEditMode = false;
+
+        // Function to toggle edit mode
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const editButton = document.getElementById("edit-button");
+            const addSceneButton = document.getElementById("add-scene-button");
+            const sceneButtons = document.querySelectorAll(".scene-button");
+
+            if (isEditMode) {
+                editButton.textContent = "Exit Edit Mode";
+                addSceneButton.style.display = "block"; // Show the Add Scene button in edit mode
+                sceneButtons.forEach(button => {
+                    button.classList.add("edit-mode");
+                    const deleteButton = button.querySelector('.delete-button');
+                    if (deleteButton) deleteButton.style.display = "block";
+                });
+            } else {
+                editButton.textContent = "Edit";
+                addSceneButton.style.display = "none"; // Hide the Add Scene button in non-edit mode
+                sceneButtons.forEach(button => {
+                    button.classList.remove("edit-mode");
+                    const deleteButton = button.querySelector('.delete-button');
+                    if (deleteButton) deleteButton.style.display = "none";
+                });
+                // Clear the text field when exiting edit mode
+                document.getElementById("add-scene-box").style.display = "none"; // Hide the add scene box
+                document.getElementById("new-scene-name").value = ""; // Clear the input field
+            }
+        }
+
+        // Function to show the add scene box when the "Add Scene" button is clicked
+        function showAddSceneBox() {
+            const addSceneBox = document.getElementById("add-scene-box");
+            addSceneBox.style.display = "block";
+        }
+
+        // Function to add a new scene
+        function addNewScene() {
+            const sceneList = document.getElementById("scene-list");
+            const newSceneName = document.getElementById("new-scene-name").value;
+            if (newSceneName.trim() === "") {
+                alert("Please enter a scene name.");
+                return;
+            }
+
+            const sceneNumber = sceneList.children.length + 1;
+            const newScene = document.createElement("button");
+            newScene.className = "scene-button";
+            newScene.innerHTML = `${newSceneName}<button class="delete-button" onclick="deleteScene(event, ${sceneNumber})">X</button>`;
+            newScene.setAttribute("onclick", `selectScene(${sceneNumber}, '${newSceneName}')`);
+            newScene.id = `scene-${sceneNumber}`;
+
+            sceneList.appendChild(newScene);
+            document.getElementById("new-scene-name").value = ""; // Reset the input field
+            document.getElementById("add-scene-box").style.display = "none"; // Hide the box
+
+            saveScenes(); // Save the scenes to localStorage
+        }
+
+        // Function to select a scene
+        function selectScene(sceneNumber, sceneName) {
+            fetch(`/set-scene?scene=${sceneNumber}`).then(() => {
+                startCountdown(sceneNumber, sceneName);
+            });
+        }
+
+        // Function to start the countdown and change button color
+        function startCountdown(sceneNumber, sceneName) {
+            const countdownDiv = document.getElementById('countdown');
+            const buttons = document.querySelectorAll('.scene-button');
+            const steps = ["3...", "2...", "1..."];
+            let stepIndex = 0;
+            let currentButton = document.getElementById(`scene-${sceneNumber}`);
+
+            buttons.forEach(button => button.classList.remove('red', 'green'));
+
+            currentButton.classList.add('red');
+            countdownDiv.innerText = `${sceneName} in ${steps[stepIndex]}`;
+
+            const interval = setInterval(() => {
+                stepIndex++;
+                if (stepIndex < steps.length) {
+                    countdownDiv.innerText = `${sceneName} in ${steps[stepIndex]}`;
+                } else {
+                    currentButton.classList.add('green');
+                    currentButton.classList.remove('red');
+                    countdownDiv.innerText = `${sceneName} in Go!`;
+                    setTimeout(() => {
+                        currentButton.classList.remove('green');
+                        countdownDiv.innerText = '';
+                    }, 10000);
+                    clearInterval(interval);
+                }
+            }, 750); // 0.75-second delay
+        }
+
+        // Function to delete a scene
+        function deleteScene(event, sceneNumber) {
+            event.stopPropagation();
+            const sceneButton = document.getElementById(`scene-${sceneNumber}`);
+            sceneButton.remove();
+            saveScenes(); // Save the updated scenes to localStorage
+        }
+
+        // Function to save scenes to localStorage
+        function saveScenes() {
+            const scenes = [];
+            const sceneButtons = document.querySelectorAll(".scene-button");
+
+            sceneButtons.forEach(button => {
+                const sceneName = button.textContent.trim();
+                scenes.push(sceneName);
+            });
+
+            localStorage.setItem("scenes", JSON.stringify(scenes));
+        }
+
+        // Function to load scenes from localStorage
+        function loadScenes() {
+            const scenes = JSON.parse(localStorage.getItem("scenes"));
+
+            if (scenes) {
+                const sceneList = document.getElementById("scene-list");
+
+                scenes.forEach((sceneName, index) => {
+                    const sceneNumber = index + 1;
+                    const newScene = document.createElement("button");
+                    newScene.className = "scene-button";
+                    newScene.innerHTML = `${sceneName}<button class="delete-button" onclick="deleteScene(event, ${sceneNumber})">X</button>`;
+                    newScene.setAttribute("onclick", `selectScene(${sceneNumber}, '${sceneName}')`);
+                    newScene.id = `scene-${sceneNumber}`;
+
+                    sceneList.appendChild(newScene);
+                });
+            }
+        }
+
+        // Load scenes on page load
+        window.onload = loadScenes;
+    </script>
+</body>
+</html>
