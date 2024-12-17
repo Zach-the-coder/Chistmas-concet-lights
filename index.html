@@ -233,7 +233,7 @@
             const sceneNumber = sceneList.children.length + 1;
             const newScene = document.createElement("button");
             newScene.className = "scene-button";
-            newScene.innerHTML = `${newSceneName}<button class="delete-button" onclick="deleteScene(event, ${sceneNumber})">    </button>`;
+            newScene.innerHTML = `${newSceneName}<button class="delete-button" onclick="deleteScene(event, ${sceneNumber})">X</button>`;
             newScene.setAttribute("onclick", `selectScene(${sceneNumber}, '${newSceneName}')`);
             newScene.id = `scene-${sceneNumber}`;
 
@@ -313,7 +313,7 @@
                     const sceneNumber = index + 1;
                     const newScene = document.createElement("button");
                     newScene.className = "scene-button";
-                    newScene.innerHTML = `${sceneName}<button class="delete-button" onclick="deleteScene(event, ${sceneNumber})">    </button>`;
+                    newScene.innerHTML = `${sceneName}<button class="delete-button" onclick="deleteScene(event, ${sceneNumber})">X</button>`;
                     newScene.setAttribute("onclick", `selectScene(${sceneNumber}, '${sceneName}')`);
                     newScene.id = `scene-${sceneNumber}`;
 
